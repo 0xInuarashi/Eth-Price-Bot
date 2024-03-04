@@ -60,7 +60,7 @@ func main() {
 
 	for shardId := 0; shardId < shards; shardId++ {
 		wg.Add(1)
-		go worker(shardId, token)
+		go worker(shardId, token, coin)
 	}
 
 	wg.Wait()
