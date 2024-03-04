@@ -15,8 +15,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
-const shards = 6
+const endpoint = "https://api.coinbase.com/v2/prices/" + coin + "-usd/spot"
+const shards = 1
 
 func worker(id int, token string) {
 	discord, err := discordgo.New("Bot " + token)
@@ -52,6 +52,7 @@ func worker(id int, token string) {
 func main() {
 	fmt.Println("hello world 🌍👋")
 	token := getEnvOrDie("TOKEN")
+	coin := getEnvOrDie("COIN")
 
 	wg := sync.WaitGroup{}
 
