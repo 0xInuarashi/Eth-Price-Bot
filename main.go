@@ -15,7 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
+var endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
 const shards = 1
 
 func worker(id int, token string, coin string) {
