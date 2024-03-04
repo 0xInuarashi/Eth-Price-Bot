@@ -15,11 +15,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const endpoint = "https://api.coinbase.com/v2/prices/" + coin + "-usd/spot"
+const endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
 const shards = 1
 
-func worker(id int, token string) {
+func worker(id int, token string, coin string) {
 	discord, err := discordgo.New("Bot " + token)
+	endpoint = "https://api.coinbase.com/v2/prices/" + coin + "-usd/spot"
+
 	if err != nil {
 		log.Fatalf("Error creating discord session: %v", err)
 	}
