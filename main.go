@@ -88,7 +88,7 @@ type Response struct {
 	} `json:"data"`
 }
 
-func getPrice() (string, error) {
+func getPrice() (*Response, error) {
 	res, err := http.Get(endpoint)
 
 	if res != nil {
