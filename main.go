@@ -15,7 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot" // unused lol
+var endpoint = "https://mempool.space/api/v1/fees/recommended" // unused lol
 const shards = 1
 
 func worker(id int, token string, coin string) {
@@ -100,21 +100,24 @@ func getPrice() (string, error) {
 	}
 
 	jsonPayload, err := decodeJson[Response](res.Body)
+
+	fmt.Println(jsonPayload)
+
 	if err != nil {
 		return "", fmt.Errorf("failed to decode json: %v", err)
 	}
 
-	fast, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
+	fast, err := strconv.ParseFloat(jsonPayload.Data.Fast, 64)
 	if err != nil {
 		return "", fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	medium, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
+	medium, err := strconv.ParseFloat(jsonPayload.Data.Medium, 64)
 	if err != nil {
 		return "", fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	slow, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
+	slow, err := strconv.ParseFloat(jsonPayload.Data.Slow, 64)
 	if err != nil {
 		return "", fmt.Errorf("invalid amount format: %v", err)
 	}
