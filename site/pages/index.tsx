@@ -11,7 +11,7 @@ export default function Index() {
     <Container>
       <DiscordBot
         image="https://cdn.discordapp.com/avatars/736610809597264032/5cd342758a4d1d9547d0e545123309a5.png?size=256"
-        name="ETH Price"
+        name="BTC Price Bot"
         status={`Watching $${price}`}
         size={1.8}
         style={{ boxShadow: "$1" }}

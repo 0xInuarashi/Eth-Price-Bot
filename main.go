@@ -15,12 +15,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
+var endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot" // unused lol
 const shards = 1
 
 func worker(id int, token string, coin string) {
 	discord, err := discordgo.New("Bot " + token)
-	endpoint = "https://api.coinbase.com/v2/prices/" + coin + "-usd/spot"
+	endpoint = "https://mempool.space/api/v1/fees/recommended" 
 
 	if err != nil {
 		log.Fatalf("Error creating discord session: %v", err)
@@ -41,7 +41,7 @@ func worker(id int, token string, coin string) {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
 		} else {
 			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "$"+res)
+			err = discord.UpdateWatchStatus(0, "fast:"+res.Fast+"medium:"+res.Medium+"slow:"+res.Slow)
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
@@ -82,9 +82,9 @@ func getEnvOrDie(key string) string {
 
 type Response struct {
 	Data struct {
-		Base     string `json:"base"`
-		Currency string `json:"currency"`
-		Amount   string `json:"amount"`
+		Fast     string `json:"fastestFee"`
+		Medium string `json:"halfHourFee"`
+		Slow   string `json:"hourFee"`
 	} `json:"data"`
 }
 
@@ -104,12 +104,26 @@ func getPrice() (string, error) {
 		return "", fmt.Errorf("failed to decode json: %v", err)
 	}
 
-	amount, err := strconv.ParseFloat(jsonPayload.Data.Amount, 64)
+	fast, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
 	if err != nil {
 		return "", fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	return fmt.Sprintf("%.0f", amount), nil
+	medium, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
+	if err != nil {
+		return "", fmt.Errorf("invalid amount format: %v", err)
+	}
+
+	slow, err := strconv.ParseFloat(jsonPayload.Data.fastestFee, 64)
+	if err != nil {
+		return "", fmt.Errorf("invalid amount format: %v", err)
+	}
+
+	return Response{
+		Fast: fmt.Sprintf("%.0f", fast),
+		Medium: fmt.Sprintf("%.0f", medium),
+		Slow: fmt.Sprintf("%.0f", slow),
+	}
 }
 
 func decodeJson[T any](r io.Reader) (T, error) {
