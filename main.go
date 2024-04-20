@@ -41,7 +41,7 @@ func worker(id int, token string, coin string) {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
 		} else {
 			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "fast:"+res.Fast+"medium:"+res.Medium+"slow:"+res.Slow)
+			err = discord.UpdateWatchStatus(0, "fast:"+res.Data.Fast+"medium:"+res.Data.Medium+"slow:"+res.Data.Slow)
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
