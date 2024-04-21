@@ -41,7 +41,7 @@ func worker(id int, token string, coin string) {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
 		} else {
 			// fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "fast:"+res.Data.Fast+"medium:"+res.Data.Medium+"slow:"+res.Data.Slow)
+			err = discord.UpdateWatchStatus(0, "⚡"+strconv.Itoa(res.Fast)+" |🚶‍♂️"+strconv.Itoa(res.Medium)+" |🐢"+strconv.Itoa(res.Slow))
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
@@ -81,11 +81,15 @@ func getEnvOrDie(key string) string {
 }
 
 type Response struct {
-	Data struct {
-		Fast   string `json:"fastestFee"`
-		Medium string `json:"halfHourFee"`
-		Slow   string `json:"hourFee"`
-	} `json:"data"`
+	Fast   int `json:"fastestFee"`
+	Medium int `json:"halfHourFee"`
+	Slow   int `json:"hourFee"`
+}
+
+type Return struct {
+	Fast   string `json:"fastestFee"`
+	Medium string `json:"halfHourFee"`
+	Slow   string `json:"hourFee"`
 }
 
 func getPrice() (Response, error) {
@@ -95,44 +99,54 @@ func getPrice() (Response, error) {
 		defer res.Body.Close()
 	}
 
+	fmt.Println(res)
+	fmt.Println("Body")
+	fmt.Println(res.Body)
+
 	// if err != nil {
 	// 	return "", fmt.Errorf("failed to fetch: %v", err)
 	// }
 
-	jsonPayload, err := decodeJson[Response](res.Body)
+	// jsonPayload, err := decodeJson[Response](res.Body)
+	var jsonPayload Response
+	err = json.NewDecoder(res.Body).Decode(&jsonPayload)
 
-	// fmt.Println("Hi")
-	// fmt.Println(jsonPayload)
+	if err != nil {
+        fmt.Printf("Error decoding JSON: %s\n", err)
+        return Response{}, fmt.Errorf("fail")
+    }
+
+    fmt.Printf("Decoded JSON: %+v\n", jsonPayload)
+
+	fmt.Println("Hi")
+	fmt.Println(jsonPayload)
 
 	if err != nil {
 		return Response{}, fmt.Errorf("failed to decode json: %v", err)
 	}
 
-	fast, err := strconv.ParseFloat(jsonPayload.Data.Fast, 64)
+	// fast, err := strconv.ParseFloat(jsonPayload.Fast, 64)
+	fast := jsonPayload.Fast
 	if err != nil {
 		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	medium, err := strconv.ParseFloat(jsonPayload.Data.Medium, 64)
+	// medium, err := strconv.ParseFloat(jsonPayload.Medium, 64)
+	medium := jsonPayload.Medium
 	if err != nil {
 		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	slow, err := strconv.ParseFloat(jsonPayload.Data.Slow, 64)
+	// slow, err := strconv.ParseFloat(jsonPayload.Slow, 64)
+	slow := jsonPayload.Slow
 	if err != nil {
 		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
 	return Response{
-		Data: struct {
-			Fast   string `json:"fastestFee"`
-			Medium string `json:"halfHourFee"`
-			Slow   string `json:"hourFee"`
-		}{
-			Fast:   fmt.Sprintf("%.0f", fast),
-			Medium: fmt.Sprintf("%.0f", medium),
-			Slow:   fmt.Sprintf("%.0f", slow),
-		},
+		Fast:   fast,
+		Medium: medium,
+		Slow:   slow,
 	}, nil	
 }
 
