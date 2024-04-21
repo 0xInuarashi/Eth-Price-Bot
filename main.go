@@ -40,7 +40,7 @@ func worker(id int, token string, coin string) {
 		if err != nil {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
 		} else {
-			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
+			// fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
 			err = discord.UpdateWatchStatus(0, "fast:"+res.Data.Fast+"medium:"+res.Data.Medium+"slow:"+res.Data.Slow)
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
@@ -82,7 +82,7 @@ func getEnvOrDie(key string) string {
 
 type Response struct {
 	Data struct {
-		Fast     string `json:"fastestFee"`
+		Fast   string `json:"fastestFee"`
 		Medium string `json:"halfHourFee"`
 		Slow   string `json:"hourFee"`
 	} `json:"data"`
@@ -95,38 +95,45 @@ func getPrice() (Response, error) {
 		defer res.Body.Close()
 	}
 
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch: %v", err)
-	}
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to fetch: %v", err)
+	// }
 
 	jsonPayload, err := decodeJson[Response](res.Body)
 
-	fmt.Println(jsonPayload)
+	// fmt.Println("Hi")
+	// fmt.Println(jsonPayload)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to decode json: %v", err)
+		return Response{}, fmt.Errorf("failed to decode json: %v", err)
 	}
 
 	fast, err := strconv.ParseFloat(jsonPayload.Data.Fast, 64)
 	if err != nil {
-		return "", fmt.Errorf("invalid amount format: %v", err)
+		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
 	medium, err := strconv.ParseFloat(jsonPayload.Data.Medium, 64)
 	if err != nil {
-		return "", fmt.Errorf("invalid amount format: %v", err)
+		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
 	slow, err := strconv.ParseFloat(jsonPayload.Data.Slow, 64)
 	if err != nil {
-		return "", fmt.Errorf("invalid amount format: %v", err)
+		return Response{}, fmt.Errorf("invalid amount format: %v", err)
 	}
 
 	return Response{
-		Fast: fmt.Sprintf("%.0f", fast),
-		Medium: fmt.Sprintf("%.0f", medium),
-		Slow: fmt.Sprintf("%.0f", slow),
-	}
+		Data: struct {
+			Fast   string `json:"fastestFee"`
+			Medium string `json:"halfHourFee"`
+			Slow   string `json:"hourFee"`
+		}{
+			Fast:   fmt.Sprintf("%.0f", fast),
+			Medium: fmt.Sprintf("%.0f", medium),
+			Slow:   fmt.Sprintf("%.0f", slow),
+		},
+	}, nil	
 }
 
 func decodeJson[T any](r io.Reader) (T, error) {
