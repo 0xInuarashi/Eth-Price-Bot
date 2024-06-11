@@ -22,6 +22,8 @@ func worker(id int, token string, coin string) {
 	discord, err := discordgo.New("Bot " + token)
 	endpoint = "https://api.coinbase.com/v2/prices/" + coin + "-usd/spot"
 
+	btcendpoint = "https://api.coinbase.com/v2/prices/btc-usd/spot"
+
 	if err != nil {
 		log.Fatalf("Error creating discord session: %v", err)
 	}
@@ -37,11 +39,19 @@ func worker(id int, token string, coin string) {
 
 	for {
 		res, err := getPrice()
+		res2, err2 := getBTCPrice()
+
+		if err2 != nil {
+			log.Printf("Error getting price for shard %d: %v \n", id, err)
+		}
+		
 		if err != nil {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
-		} else {
+		} 
+		
+		else {
 			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "$"+res)
+			err = discord.UpdateWatchStatus(0, "$"+res+" ("res2/res":1)")
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
@@ -90,6 +100,30 @@ type Response struct {
 
 func getPrice() (string, error) {
 	res, err := http.Get(endpoint)
+
+	if res != nil {
+		defer res.Body.Close()
+	}
+
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch: %v", err)
+	}
+
+	jsonPayload, err := decodeJson[Response](res.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode json: %v", err)
+	}
+
+	amount, err := strconv.ParseFloat(jsonPayload.Data.Amount, 64)
+	if err != nil {
+		return "", fmt.Errorf("invalid amount format: %v", err)
+	}
+
+	return fmt.Sprintf("%.0f", amount), nil
+}
+
+func getBTCPrice() (string, error) {
+	res, err := http.Get(btcendpoint)
 
 	if res != nil {
 		defer res.Body.Close()
