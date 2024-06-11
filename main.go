@@ -16,6 +16,7 @@ import (
 )
 
 var endpoint = "https://api.coinbase.com/v2/prices/eth-usd/spot"
+var btcendpoint = "https://api.coinbase.com/v2/prices/btc-usd/spot"
 const shards = 1
 
 func worker(id int, token string, coin string) {
@@ -41,17 +42,39 @@ func worker(id int, token string, coin string) {
 		res, err := getPrice()
 		res2, err2 := getBTCPrice()
 
+		resFloat, err := strconv.ParseFloat(res, 64)
+		if err != nil {
+			log.Printf("Error converting res to float for shard %d: %v \n", id, err)
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+		res2Float, err := strconv.ParseFloat(res2, 64)
+		if err != nil {
+			log.Printf("Error converting res2 to float for shard %d: %v \n", id, err)
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+		ratio := res2Float / resFloat
+		ratioStr := strconv.FormatFloat(ratio, 'f', 2, 64)
+		status := fmt.Sprintf("$%s (%.2f)", res, ratio)
+		err = discord.UpdateWatchStatus(0, status)
+		if err != nil {
+			log.Printf("Error updating discord status for shard %d: %v \n", id, err)
+		}
+
 		if err2 != nil {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
+		} else {
+			//
 		}
 		
 		if err != nil {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
-		} 
-		
-		else {
+		} else {
 			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "$"+res+" ("res2/res":1)")
+			err = discord.UpdateWatchStatus(0, "$"+res+" (" + ratioStr + ":1)")
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
