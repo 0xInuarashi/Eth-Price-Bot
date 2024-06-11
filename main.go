@@ -58,8 +58,7 @@ func worker(id int, token string, coin string) {
 
 		ratio := res2Float / resFloat
 		ratioStr := strconv.FormatFloat(ratio, 'f', 2, 64)
-		status := fmt.Sprintf("$%s (%.2f)", res, ratio)
-		err = discord.UpdateWatchStatus(0, status)
+
 		if err != nil {
 			log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 		}
@@ -74,7 +73,7 @@ func worker(id int, token string, coin string) {
 			log.Printf("Error getting price for shard %d: %v \n", id, err)
 		} else {
 			fmt.Printf("WorkerId %v got %v \n", id, "$"+res)
-			err = discord.UpdateWatchStatus(0, "$"+res+" (" + ratioStr + ":1)")
+			err = discord.UpdateWatchStatus(0, "$"+res+" /" + ratioStr + ":1")
 			if err != nil {
 				log.Printf("Error updating discord status for shard %d: %v \n", id, err)
 			}
