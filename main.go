@@ -132,6 +132,9 @@ func getPrice() (string, error) {
 	}
 
 	jsonPayload, err := decodeJson[Response](res.Body)
+
+	fmt.Printf("%s\n", jsonPayload)
+
 	if err != nil {
 		return "", fmt.Errorf("failed to decode json: %v", err)
 	}
@@ -141,7 +144,7 @@ func getPrice() (string, error) {
 		return "", fmt.Errorf("invalid amount format: %v", err)
 	}
 
-	return fmt.Sprintf("%.0f", amount), nil
+	return fmt.Sprintf("%.3f", amount), nil
 }
 
 func getBTCPrice() (string, error) {
